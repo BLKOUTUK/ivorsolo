@@ -2,8 +2,12 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
+import path from 'path'
 import { createClient } from '@supabase/supabase-js'
 import winston from 'winston'
+import { v4 as uuidv4 } from 'uuid'
+import nodemailer from 'nodemailer'
+import cron from 'node-cron'
 
 // Load environment variables
 dotenv.config()
@@ -34,6 +38,43 @@ const supabaseUrl = process.env.SUPABASE_URL || ''
 const supabaseKey = process.env.SUPABASE_ANON_KEY || ''
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// Email Configuration
+interface EmailConfig {
+  host: string
+  port: number
+  secure: boolean
+  auth: {
+    user: string
+    pass: string
+  }
+}
+
+const emailConfig: EmailConfig = {
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || ''
+  }
+}
+
+// Initialize email transporter
+const transporter = nodemailer.createTransport(emailConfig)
+
+// Verify email configuration on startup
+if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+  transporter.verify((error: any, success: any) => {
+    if (error) {
+      logger.error('Email configuration failed:', error)
+    } else {
+      logger.info('Email service ready for weekly reports')
+    }
+  })
+} else {
+  logger.warn('Email not configured - weekly reports will not be sent automatically')
+}
+
 // Middleware
 app.use(helmet())
 app.use(cors({
@@ -45,6 +86,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
 
+// Serve static files from the public directory
+app.use(express.static(path.join(process.cwd(), 'public')))
+
 // Request logging middleware
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path}`, { 
@@ -53,6 +97,394 @@ app.use((req, res, next) => {
   })
   next()
 })
+
+// I.V.O.R. Learning and Analytics System
+interface ConversationMetrics {
+  id: string
+  conversationId: string
+  timestamp: Date
+  messageType: 'user' | 'assistant'
+  serviceUsed?: string
+  topicCategory?: string
+  responseTime: number
+  userSatisfaction?: number // 1-5 scale
+  sessionDuration?: number
+  deviceType?: string
+  location?: string // anonymized region
+  weekOfYear: number
+  monthOfYear: number
+}
+
+interface LearningPattern {
+  id: string
+  patternType: 'service_demand' | 'topic_trend' | 'user_journey' | 'gap_identification'
+  description: string
+  frequency: number
+  confidence: number
+  actionable: boolean
+  discovered: Date
+  lastSeen: Date
+}
+
+interface ServiceGap {
+  id: string
+  gapType: 'unmet_need' | 'service_limitation' | 'resource_shortage' | 'feature_request'
+  description: string
+  frequency: number
+  urgency: 'low' | 'medium' | 'high' | 'critical'
+  suggestedAction: string
+  communityImpact: string
+  discovered: Date
+}
+
+// In-memory stores for analytics (in production, use persistent database)
+const conversationMetrics = new Map<string, ConversationMetrics[]>()
+const learningPatterns = new Map<string, LearningPattern>()
+const serviceGaps = new Map<string, ServiceGap>()
+const weeklyInsights = new Map<string, any>()
+const monthlyReports = new Map<string, any>()
+
+// Analytics tracking function
+function trackConversation(data: Partial<ConversationMetrics>) {
+  const metric: ConversationMetrics = {
+    id: uuidv4(),
+    conversationId: data.conversationId || 'anonymous',
+    timestamp: new Date(),
+    messageType: data.messageType || 'user',
+    serviceUsed: data.serviceUsed,
+    topicCategory: data.topicCategory,
+    responseTime: data.responseTime || 0,
+    deviceType: data.deviceType,
+    location: data.location,
+    weekOfYear: new Date().getWeek(),
+    monthOfYear: new Date().getMonth() + 1,
+    ...data
+  }
+
+  const conversationKey = metric.conversationId
+  if (!conversationMetrics.has(conversationKey)) {
+    conversationMetrics.set(conversationKey, [])
+  }
+  conversationMetrics.get(conversationKey)!.push(metric)
+
+  // Real-time learning
+  identifyPatterns(metric)
+  detectServiceGaps(metric)
+}
+
+// Pattern identification for I.V.O.R. learning
+function identifyPatterns(metric: ConversationMetrics) {
+  // Service demand patterns
+  if (metric.serviceUsed) {
+    const patternKey = `service_demand_${metric.serviceUsed}`
+    const existing = learningPatterns.get(patternKey)
+    
+    if (existing) {
+      existing.frequency++
+      existing.lastSeen = new Date()
+      existing.confidence = Math.min(existing.confidence + 0.1, 1.0)
+    } else {
+      learningPatterns.set(patternKey, {
+        id: patternKey,
+        patternType: 'service_demand',
+        description: `High demand for ${metric.serviceUsed} service`,
+        frequency: 1,
+        confidence: 0.1,
+        actionable: true,
+        discovered: new Date(),
+        lastSeen: new Date()
+      })
+    }
+  }
+
+  // Topic trend analysis
+  if (metric.topicCategory) {
+    const topicKey = `topic_trend_${metric.topicCategory}`
+    const existing = learningPatterns.get(topicKey)
+    
+    if (existing) {
+      existing.frequency++
+      existing.lastSeen = new Date()
+    } else {
+      learningPatterns.set(topicKey, {
+        id: topicKey,
+        patternType: 'topic_trend',
+        description: `Emerging interest in ${metric.topicCategory}`,
+        frequency: 1,
+        confidence: 0.1,
+        actionable: false,
+        discovered: new Date(),
+        lastSeen: new Date()
+      })
+    }
+  }
+}
+
+// Service gap detection
+function detectServiceGaps(metric: ConversationMetrics) {
+  // Analyze response times for performance gaps
+  if (metric.responseTime > 3000) { // Slow responses indicate system strain
+    const gapKey = 'performance_gap'
+    const existing = serviceGaps.get(gapKey)
+    
+    if (existing) {
+      existing.frequency++
+    } else {
+      serviceGaps.set(gapKey, {
+        id: gapKey,
+        gapType: 'service_limitation',
+        description: 'Slow response times affecting user experience',
+        frequency: 1,
+        urgency: 'medium',
+        suggestedAction: 'Optimize response generation or scale infrastructure',
+        communityImpact: 'Users may abandon conversations due to delays',
+        discovered: new Date()
+      })
+    }
+  }
+
+  // Detect unmet needs (users asking for services we don't offer)
+  // This would be enhanced with NLP analysis in production
+}
+
+// Helper function to categorize user messages for analytics
+function categorizeMessage(message: string): string {
+  const lowerMessage = message.toLowerCase()
+  
+  // Health & wellness categories
+  if (lowerMessage.includes('health') || lowerMessage.includes('medical') || lowerMessage.includes('doctor') || 
+      lowerMessage.includes('mental health') || lowerMessage.includes('depression') || lowerMessage.includes('anxiety')) {
+    return 'health_wellness'
+  }
+  
+  // Relationship categories
+  if (lowerMessage.includes('relationship') || lowerMessage.includes('dating') || lowerMessage.includes('partner') ||
+      lowerMessage.includes('family') || lowerMessage.includes('friend') || lowerMessage.includes('love')) {
+    return 'relationships'
+  }
+  
+  // Career categories
+  if (lowerMessage.includes('job') || lowerMessage.includes('career') || lowerMessage.includes('work') ||
+      lowerMessage.includes('employment') || lowerMessage.includes('boss') || lowerMessage.includes('interview')) {
+    return 'career_professional'
+  }
+  
+  // Personal development
+  if (lowerMessage.includes('goal') || lowerMessage.includes('habit') || lowerMessage.includes('growth') ||
+      lowerMessage.includes('motivation') || lowerMessage.includes('confidence') || lowerMessage.includes('journal')) {
+    return 'personal_development'
+  }
+  
+  // Identity & community
+  if (lowerMessage.includes('identity') || lowerMessage.includes('queer') || lowerMessage.includes('gay') ||
+      lowerMessage.includes('community') || lowerMessage.includes('discrimination') || lowerMessage.includes('coming out')) {
+    return 'identity_community'
+  }
+  
+  // Crisis & immediate support
+  if (lowerMessage.includes('crisis') || lowerMessage.includes('emergency') || lowerMessage.includes('urgent') ||
+      lowerMessage.includes('help') || lowerMessage.includes('support') || lowerMessage.includes('suicide')) {
+    return 'crisis_support'
+  }
+  
+  // Housing & practical support
+  if (lowerMessage.includes('housing') || lowerMessage.includes('homeless') || lowerMessage.includes('accommodation') ||
+      lowerMessage.includes('rent') || lowerMessage.includes('eviction')) {
+    return 'housing_practical'
+  }
+  
+  return 'general_conversation'
+}
+
+// Helper function to detect which service was used in the conversation
+function detectServiceUsed(userMessage: string, assistantResponse: string): string | undefined {
+  const combinedText = `${userMessage} ${assistantResponse}`.toLowerCase()
+  
+  // Check for specific service indicators in the response
+  if (combinedText.includes('wellness coaching') || combinedText.includes('habit coaching') ||
+      combinedText.includes('15-section') || combinedText.includes('wellness assessment')) {
+    return 'wellness-coaching'
+  }
+  
+  if (combinedText.includes('problem solving') || combinedText.includes('mental model') ||
+      combinedText.includes('strategic thinking') || combinedText.includes('framework')) {
+    return 'problem-solving'
+  }
+  
+  if (combinedText.includes('journaling') || combinedText.includes('morning ritual') ||
+      combinedText.includes('evening ritual') || combinedText.includes('transformational')) {
+    return 'transformational-journaling'
+  }
+  
+  if (combinedText.includes('relationship coaching') || combinedText.includes('attachment style') ||
+      combinedText.includes('communication patterns')) {
+    return 'relationship-coaching'
+  }
+  
+  if (combinedText.includes('career guidance') || combinedText.includes('professional development') ||
+      combinedText.includes('career planning')) {
+    return 'career-guidance'
+  }
+  
+  if (combinedText.includes('health advice') || combinedText.includes('medical') ||
+      combinedText.includes('healthcare navigation')) {
+    return 'health-advice'
+  }
+  
+  // Check for immediate resource responses
+  if (combinedText.includes('crisis') || combinedText.includes('emergency') ||
+      combinedText.includes('immediate support') || combinedText.includes('hotline')) {
+    return 'immediate-resources'
+  }
+  
+  return undefined
+}
+
+// Distress Detection and Emergency Protocol System
+interface DistressSignal {
+  level: 'low' | 'medium' | 'high' | 'critical'
+  indicators: string[]
+  immediateResponse: boolean
+  followUpRequired: boolean
+}
+
+function detectDistressLevel(message: string): DistressSignal {
+  const lowerMessage = message.toLowerCase()
+  
+  // Critical distress indicators (immediate emergency response)
+  const criticalKeywords = [
+    'suicide', 'kill myself', 'end my life', 'want to die', 'better off dead',
+    'overdose', 'self harm', 'cut myself', 'hurt myself', 
+    'emergency', 'crisis', 'immediate danger', 'urgent help'
+  ]
+  
+  // High distress indicators 
+  const highKeywords = [
+    'depressed', 'hopeless', 'can\'t cope', 'overwhelmed', 'breaking down',
+    'panic attack', 'anxiety attack', 'mental breakdown', 'desperate',
+    'isolated', 'alone', 'nobody cares', 'worthless'
+  ]
+  
+  // Medium distress indicators
+  const mediumKeywords = [
+    'stressed', 'worried', 'anxious', 'sad', 'upset', 'struggling',
+    'difficult time', 'hard to cope', 'need support', 'feeling down'
+  ]
+  
+  const foundCritical = criticalKeywords.filter(keyword => lowerMessage.includes(keyword))
+  const foundHigh = highKeywords.filter(keyword => lowerMessage.includes(keyword))
+  const foundMedium = mediumKeywords.filter(keyword => lowerMessage.includes(keyword))
+  
+  if (foundCritical.length > 0) {
+    return {
+      level: 'critical',
+      indicators: foundCritical,
+      immediateResponse: true,
+      followUpRequired: true
+    }
+  }
+  
+  if (foundHigh.length >= 2 || (foundHigh.length >= 1 && foundMedium.length >= 1)) {
+    return {
+      level: 'high',
+      indicators: [...foundHigh, ...foundMedium],
+      immediateResponse: true,
+      followUpRequired: true
+    }
+  }
+  
+  if (foundHigh.length >= 1 || foundMedium.length >= 2) {
+    return {
+      level: 'medium',
+      indicators: [...foundHigh, ...foundMedium],
+      immediateResponse: false,
+      followUpRequired: true
+    }
+  }
+  
+  if (foundMedium.length >= 1) {
+    return {
+      level: 'low',
+      indicators: foundMedium,
+      immediateResponse: false,
+      followUpRequired: false
+    }
+  }
+  
+  return {
+    level: 'low',
+    indicators: [],
+    immediateResponse: false,
+    followUpRequired: false
+  }
+}
+
+function generateEmergencyResponse(distressSignal: DistressSignal): string {
+  if (distressSignal.level === 'critical') {
+    return `🚨 **IMMEDIATE EMERGENCY SUPPORT**
+
+**If you are in immediate danger, please contact emergency services:**
+• **Emergency Services: 999**
+• **Samaritans: 116 123** (free, 24/7)
+• **Crisis Text Line: Text SHOUT to 85258**
+
+**LGBTQ+ Specific Crisis Support:**
+• **Switchboard LGBT+: 0300 330 0630** (10am-10pm daily)
+• **MindLine Trans+: 0300 330 5468** (Mon & Fri 8pm-midnight)
+
+**You are not alone. Your life has value. Help is available right now.**
+
+I'm here to support you, but please prioritize getting immediate professional help. Would you like me to help you find local crisis services or someone to talk to right now?`
+  }
+  
+  if (distressSignal.level === 'high') {
+    return `💛 **PRIORITY SUPPORT AVAILABLE**
+
+I can see you're going through a really difficult time. You've taken a brave step by reaching out.
+
+**Immediate Support Options:**
+• **Samaritans: 116 123** (free, confidential, 24/7)
+• **Mind LGBTQ+: 0300 123 3393**
+• **Switchboard LGBT+: 0300 330 0630**
+• **Crisis Text Line: Text SHOUT to 85258**
+
+**You don't have to handle this alone.** I'm here to support you through this conversation, and I can help connect you with professional support.
+
+What feels most urgent for you right now? Would you like immediate crisis support or shall we work through this together step by step?`
+  }
+  
+  if (distressSignal.level === 'medium') {
+    return `💚 **CARING SUPPORT**
+
+I hear that you're struggling right now, and I want you to know that reaching out shows real strength.
+
+**Support Available:**
+• **Samaritans: 116 123** (always available to listen)
+• **Mind LGBTQ+: 0300 123 3393** 
+• **Switchboard LGBT+: 0300 330 0630**
+
+I'm here to support you through this. Whether you need immediate professional support or want to work through this together, we can take it at your pace.
+
+What kind of support would feel most helpful right now?`
+  }
+  
+  return '' // Low level - no emergency response needed
+}
+
+// Extend Date prototype for week calculation
+declare global {
+  interface Date {
+    getWeek(): number
+  }
+}
+
+Date.prototype.getWeek = function() {
+  const date = new Date(this.getTime())
+  date.setHours(0, 0, 0, 0)
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7)
+  const week1 = new Date(date.getFullYear(), 0, 4)
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7)
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -68,6 +500,7 @@ app.get('/health', (req, res) => {
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, conversation_id, user_context } = req.body
+    const startTime = Date.now()
 
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ 
@@ -81,8 +514,59 @@ app.post('/api/chat', async (req, res) => {
       hasUserContext: !!user_context
     })
 
+    // Track user message
+    const deviceType = req.get('User-Agent')?.includes('Mobile') ? 'mobile' : 'desktop'
+    trackConversation({
+      conversationId: conversation_id,
+      messageType: 'user',
+      deviceType,
+      topicCategory: categorizeMessage(message)
+    })
+    
+    // Distress detection and emergency protocol
+    const distressSignal = detectDistressLevel(message)
+    if (distressSignal.immediateResponse) {
+      const emergencyResponse = generateEmergencyResponse(distressSignal)
+      
+      // Log emergency intervention
+      logger.warn('Emergency distress detected', {
+        conversationId: conversation_id,
+        distressLevel: distressSignal.level,
+        indicators: distressSignal.indicators,
+        timestamp: new Date().toISOString()
+      })
+      
+      // Track emergency response
+      trackConversation({
+        conversationId: conversation_id,
+        messageType: 'assistant',
+        responseTime: Date.now() - startTime,
+        serviceUsed: 'emergency-support',
+        deviceType,
+        topicCategory: 'crisis_support'
+      })
+      
+      return res.json({
+        response: emergencyResponse,
+        conversation_id,
+        timestamp: new Date().toISOString(),
+        emergency_protocol_activated: true,
+        distress_level: distressSignal.level
+      })
+    }
+
     // Generate IVOR response based on message content
     const response = await generateIVORResponse(message, user_context)
+    const responseTime = Date.now() - startTime
+
+    // Track assistant response
+    trackConversation({
+      conversationId: conversation_id,
+      messageType: 'assistant',
+      responseTime,
+      serviceUsed: detectServiceUsed(message, response),
+      deviceType
+    })
 
     // Store conversation in database
     if (conversation_id) {
@@ -170,6 +654,14 @@ const IVOR_SERVICES: IVORService[] = [
     icon: '🚀',
     category: 'Professional Growth',
     intro: 'Develop career strategies that honor your identity while advancing your professional goals and economic liberation.'
+  },
+  {
+    id: 'health-advice',
+    name: 'Health & Wellbeing Advice',
+    description: 'Comprehensive health guidance for Black queer men',
+    icon: '🏥',
+    category: 'Health & Wellness',
+    intro: 'I\'ll provide personalized health advice covering mental health, sexual health, physical wellness, and navigating healthcare systems as a Black queer man, incorporating evidence-based guidance from specialized resources.'
   }
 ]
 
@@ -310,7 +802,15 @@ async function generateIVORResponse(message: string, userContext?: any): Promise
   }
   
   // Service selection logic
-  if (lowerMessage.includes('wellness') || lowerMessage.includes('habit') || lowerMessage.includes('health')) {
+  if (lowerMessage.includes('health advice') || lowerMessage.includes('health guidance') || 
+      lowerMessage.includes('sexual health') || lowerMessage.includes('mental health') ||
+      lowerMessage.includes('physical health') || lowerMessage.includes('healthcare')) {
+    session.currentService = 'health-advice'
+    session.currentStep = 'introduction'
+    return generateHealthTopicsMenu()
+  }
+  
+  if (lowerMessage.includes('wellness') || lowerMessage.includes('habit')) {
     session.currentService = 'wellness-coaching'
     session.currentStep = 'introduction'
     session.progress = { completedSections: [], currentSection: 'persona-snapshot' }
@@ -443,51 +943,62 @@ You don't have to face this alone. Would you like me to help you find specific s
 
 // Service Framework Functions
 function generateServiceSelectionResponse(): string {
-  return `Hi! I'm I.V.O.R. - your Intelligent Virtual Organizing Resource. I offer both immediate resource support and comprehensive life coaching specifically designed for Black queer liberation and empowerment.
+  return `😎 **HEY BEAUTIFUL! I'M I.V.O.R.** 🌈
 
-**🚀 Need quick help? Just tell me what you need:**
-- Mental health support, therapy
-- Housing assistance, accommodation  
-- Legal help, discrimination issues
-- Community events, local connections
-- Crisis support, emergency resources
+Your Intelligent Virtual Organizing Resource, here to support your Black queer liberation journey with both immediate help and deep coaching. Think of me as your AI bestie who actually knows what they're talking about! 😂
 
-**📚 Want structured coaching? Choose a program:**
+**🚨 NEED QUICK HELP? I'VE GOT YOU:**
+• **MENTAL HEALTH** - Therapy, crisis support, culturally competent resources
+• **HOUSING** - Emergency accommodation, LGBTQ+ friendly options
+• **LEGAL SUPPORT** - Discrimination help, know your rights
+• **COMMUNITY** - Events, connections, chosen family vibes
+• **CRISIS SUPPORT** - 24/7 helplines, immediate safety
 
-🌱 **Wellness & Habit Coaching** - 15-section personalized wellness plan
-🧩 **Strategic Problem Solving** - Mental model frameworks for complex challenges  
-📖 **Transformational Journaling** - Daily morning/evening rituals for growth
-💕 **Relationship Coaching** - Dating, friendship, and social connections
-🚀 **Career Guidance** - Professional development with identity affirmation
+**💎 READY FOR DEEP COACHING? CHOOSE YOUR ADVENTURE:**
 
-**Examples:** *"I need therapy resources"* | *"I want wellness coaching"* | *"Help with housing"* | *"Start journaling"* | *"Start problem solving"*
+🌱 **WELLNESS & HABIT COACHING** - 15-section personalized wellness plan (yes, it's comprehensive!)
+🧩 **STRATEGIC PROBLEM SOLVING** - Mental model frameworks for when life gets complicated
+📖 **TRANSFORMATIONAL JOURNALING** - Daily rituals that actually transform your mindset
+💕 **RELATIONSHIP COACHING** - Dating, friendships, and navigating social connections
+🚀 **CAREER GUIDANCE** - Professional development that honors your authentic self
+🏥 **HEALTH & WELLBEING ADVICE** - Comprehensive health guidance for Black queer men
+🎭 **DAILY JOY & WELLNESS** - Humor, entertainment, and mental health boosts
 
-Whether you need immediate resources or want to dive deep into personal development, I'm here to support your liberation journey. What would be most helpful?`
+**🌟 JOIN THE BLKOUT COMMUNITY:**
+Check out [BLKOUT Events](https://blkout.uk/events) and [BLKOUTHUB](https://blkouthub.com) for community connections!
+
+**EXAMPLES:** *"I need therapy resources"* | *"Wellness coaching please"* | *"Help with housing"* | *"Start journaling"* | *"I need some joy in my life"*
+
+Whether you need immediate resources or want to dive deep into personal development, I'm here to support your liberation journey. What would be most helpful? 😊`
 }
 
 function generateWelcomeResponse(): string {
-  return `Welcome! I'm I.V.O.R. - your Intelligent Virtual Organizing Resource, designed specifically to support Black queer men in the UK.
+  return `🌟 **WELCOME TO I.V.O.R., GORGEOUS!** 🌟
 
-**I can help you in two ways:**
+I'm your Intelligent Virtual Organizing Resource, specifically designed to support Black queer liberation and empowerment. Think of me as your pocket-sized liberation coach who's always ready to help! 💪🏿
 
-🚀 **Quick Resource Support** - Immediate help with mental health, housing, legal issues, community connections, crisis support
-📚 **Comprehensive Life Coaching** - Structured programs for wellness habits, problem-solving, relationships, and career growth
+**🚀 I CAN HELP YOU IN TWO WAYS:**
 
-**For immediate resources, just mention what you need:**
-- Mental health, therapy, counseling
-- Housing, accommodation support  
-- Legal help, discrimination issues
-- Community events, meetups
-- Crisis or emergency support
+**🎆 QUICK RESOURCE SUPPORT** - When you need help NOW:
+• Mental health, therapy, crisis support
+• Housing, emergency accommodation
+• Legal help, discrimination issues  
+• Community events, chosen family connections
+• Emergency support, safety resources
 
-**For deeper coaching, choose a structured program:**
-🌱 **Wellness & Habit Coaching** - 15-section personalized plan
-🧩 **Strategic Problem Solving** - Mental model frameworks  
-📖 **Transformational Journaling** - Daily growth rituals
-💕 **Relationship Coaching** - Dating, friendships, connections
-🚀 **Career Guidance** - Professional development
+**📚 COMPREHENSIVE LIFE COACHING** - When you're ready to level up:
+🌱 **WELLNESS & HABIT COACHING** - 15-section personalized wellness plan
+🧩 **STRATEGIC PROBLEM SOLVING** - Mental model frameworks for life's puzzles
+📖 **TRANSFORMATIONAL JOURNALING** - Daily rituals that actually work
+💕 **RELATIONSHIP COACHING** - Dating, friendships, and social navigation
+🚀 **CAREER GUIDANCE** - Professional development with authenticity
+🏥 **HEALTH & WELLBEING ADVICE** - Complete health guidance for our community
+🎭 **DAILY JOY & WELLNESS** - Because laughter is medicine too!
 
-Your liberation and wellbeing matter. What kind of support would be most helpful right now?`
+**🌈 CONNECT WITH BLKOUT COMMUNITY:**
+Explore [BLKOUT Events](https://blkout.uk/events), [BLKOUTHUB](https://blkouthub.com), and our [Newsletter](https://blkout.uk/newsletter)
+
+Your liberation and wellbeing matter deeply. What kind of support would feel most helpful right now? 😊💖`
 }
 
 // Service conversation handlers
@@ -516,6 +1027,17 @@ async function handleServiceConversation(message: string, session: UserSession):
   
   if (session.currentService === 'transformational-journaling') {
     const result = await handleTransformationalJournaling(message, session)
+    if (result === 'navigate-to-main-menu') {
+      session.currentService = undefined
+      session.currentStep = undefined
+      session.progress = {}
+      return generateServiceSelectionResponse()
+    }
+    return result
+  }
+
+  if (session.currentService === 'health-advice') {
+    const result = await handleHealthAdvice(message, session)
     if (result === 'navigate-to-main-menu') {
       session.currentService = undefined
       session.currentStep = undefined
@@ -1109,6 +1631,368 @@ Sleep well knowing you're building the life you want, one intentional day at a t
 Type "main menu" to explore other I.V.O.R. services.`
 }
 
+// Health & Wellbeing Advice Service Implementation
+async function handleHealthAdvice(message: string, session: UserSession): Promise<string> {
+  const lowerMessage = message.toLowerCase()
+  
+  // Check for navigation commands first
+  if (lowerMessage.includes('main menu') || lowerMessage.includes('services') || lowerMessage.includes('start over')) {
+    return 'navigate-to-main-menu'
+  }
+
+  // Identify health topic or provide menu
+  if (lowerMessage.includes('mental health') || lowerMessage.includes('depression') || lowerMessage.includes('anxiety')) {
+    return generateMentalHealthAdvice()
+  }
+  
+  if (lowerMessage.includes('sexual health') || lowerMessage.includes('sti') || lowerMessage.includes('hiv') || lowerMessage.includes('prep')) {
+    return generateSexualHealthAdvice()
+  }
+  
+  if (lowerMessage.includes('physical health') || lowerMessage.includes('fitness') || lowerMessage.includes('exercise')) {
+    return generatePhysicalHealthAdvice()
+  }
+  
+  if (lowerMessage.includes('healthcare') || lowerMessage.includes('doctor') || lowerMessage.includes('gp') || lowerMessage.includes('medical')) {
+    return generateHealthcareNavigationAdvice()
+  }
+  
+  if (lowerMessage.includes('substance') || lowerMessage.includes('alcohol') || lowerMessage.includes('drugs') || lowerMessage.includes('chemsex')) {
+    return generateSubstanceHealthAdvice()
+  }
+  
+  if (lowerMessage.includes('joy') || lowerMessage.includes('humor') || lowerMessage.includes('entertainment') || lowerMessage.includes('fun') || lowerMessage.includes('laugh')) {
+    return generateJoyAndWellnessAdvice()
+  }
+  
+  // Default to health topics menu
+  return generateHealthTopicsMenu()
+}
+
+function generateHealthTopicsMenu(): string {
+  return `🏥 **Health & Wellbeing Guidance**
+
+I'm here to provide evidence-based health advice specifically for Black queer men, incorporating insights from specialized resources and addressing unique community health needs.
+
+**What health topic would you like guidance on?**
+
+🧠 **MENTAL HEALTH** - Depression, anxiety, community-specific mental health support
+💊 **SEXUAL HEALTH** - STI prevention, HIV/PrEP information, sexual wellbeing
+💪 **PHYSICAL HEALTH** - Fitness, nutrition, preventive care for our community
+🏥 **HEALTHCARE NAVIGATION** - Finding LGBT+ friendly providers, advocating for yourself
+🍃 **SUBSTANCE & WELLBEING** - Harm reduction, chemsex awareness, healthy relationships with substances
+🎭 **DAILY JOY & WELLNESS** - Humor, entertainment, and mental health boosts
+
+Simply tell me which area interests you, or ask a specific health question.
+
+*Remember: This guidance complements but doesn't replace professional medical advice. Always consult healthcare providers for personalized medical care.*
+
+---
+*Health information sourced from [MenRUs.co.uk](https://menrus.co.uk) - Supporting Men's Health & Wellbeing*`
+}
+
+function generateMentalHealthAdvice(): string {
+  return `🧠 **MENTAL HEALTH SUPPORT FOR BLACK QUEER MEN**
+
+**Understanding Our Unique Challenges:**
+- Black queer men face higher rates of depression, anxiety, and suicidal ideation
+- Intersection of racism, homophobia, and minority stress creates additional mental health pressures
+- Community resilience and chosen family are crucial protective factors
+
+**Evidence-Based Strategies:**
+
+**📞 Crisis Support:**
+- **Switchboard LGBT+**: 0300 330 0630 (10am-10pm daily)
+- **Samaritans**: 116 123 (24/7, free)
+- **LGBT National Hotline**: 1-888-843-4564
+
+**🎯 Building Mental Resilience:**
+1. **Community Connection** - Prioritize relationships with people who affirm your identity
+2. **Identity Affirmation** - Engage with positive Black queer representation and community
+3. **Boundaries** - Protect your energy from environments that don't support your wellbeing
+4. **Professional Support** - Seek therapists with cultural competence in LGBTQ+ and racial identity
+
+**Finding Mental Health Support:**
+- Ask providers directly: "Do you have experience with LGBTQ+ clients?"
+- Look for therapists listed with **Pink Therapy** or **BACP LGBT+ division**
+- Consider online therapy platforms with LGBTQ+ specialists
+
+**Self-Care Practices:**
+- Daily grounding techniques (breathing, meditation, movement)
+- Regular connection with affirming community
+- Creative expression and joy-centered activities
+
+Would you like specific resources for finding mental health professionals, or guidance on a particular mental health challenge?
+
+---
+*Health guidance informed by evidence-based resources including [MenRUs.co.uk](https://menrus.co.uk)*`
+}
+
+function generateSexualHealthAdvice(): string {
+  return `💊 **SEXUAL HEALTH & WELLBEING**
+
+**Comprehensive Sexual Health for Black Queer Men:**
+
+**🔒 HIV/STI Prevention:**
+- **PrEP (Pre-Exposure Prophylaxis)** - Highly effective HIV prevention
+- Regular STI testing every 3 months for sexually active individuals
+- **Post-Exposure Prophylaxis (PEP)** available within 72 hours of exposure
+
+**🏥 Where to Access Services:**
+- **56 Dean Street** (London): Walk-in sexual health clinic
+- **CliniQ**: Trans-inclusive sexual health services
+- Local GUM (Genitourinary Medicine) clinics - NHS funded
+
+**💬 Sexual Health Conversations:**
+- Communicate openly with partners about testing status
+- Normalize routine testing as part of health maintenance
+- Know your rights to confidential, judgment-free care
+
+**⚠️ Chemsex Awareness:**
+Research shows chemsex participants may have:
+- More condomless encounters
+- Higher HIV rates in some communities
+- Need for specialized support services
+
+**🆘 Support Resources:**
+- **Antidote** (London): Chemsex support - 020 7833 7606
+- **CliniQ**: Trans-inclusive services
+- **Terrence Higgins Trust**: Sexual health information and support
+
+**Key Reminders:**
+- Regular testing is healthcare, not judgment
+- Your sexual health is part of your overall wellbeing
+- You deserve respectful, comprehensive care
+
+Need help finding sexual health services in your area, or have specific questions about sexual health and safety?
+
+---
+*Sexual health information sourced from [MenRUs.co.uk](https://menrus.co.uk) and specialist LGBTQ+ health resources*`
+}
+
+function generatePhysicalHealthAdvice(): string {
+  return `💪 **PHYSICAL HEALTH & FITNESS**
+
+**Holistic Physical Wellness for Black Queer Men:**
+
+**🏃‍♂️ Fitness & Movement:**
+- Find movement that brings you joy - dancing, walking, sports, gym
+- **Community fitness groups** can provide social connection alongside physical health
+- LGBTQ+ sports clubs offer affirming environments for physical activity
+
+**🍎 Nutrition Considerations:**
+- Access to healthy food can be impacted by economic and geographic factors
+- Community gardens and food co-ops may provide affordable fresh options
+- Cultural foods can be healthy when prepared mindfully
+
+**⚕️ Preventive Health:**
+- Regular check-ups including blood pressure, cholesterol, diabetes screening
+- Age-appropriate cancer screenings
+- Mental health affects physical health - address both holistically
+
+**🏥 Health Inequalities Awareness:**
+Black men face:
+- Higher rates of hypertension and diabetes
+- Lower life expectancy due to systemic healthcare barriers
+- Need for proactive health advocacy
+
+**🤝 Finding Healthcare:**
+- Seek providers who understand both racial and LGBTQ+ health disparities
+- Ask about cultural competence and LGBTQ+ inclusive care
+- Bring trusted friends/chosen family to appointments for support
+
+**💊 Health Advocacy:**
+- Research your conditions and treatment options
+- Ask questions and seek second opinions when needed
+- Document health concerns and track symptoms
+
+**Community Resources:**
+- Local LGBTQ+ community centers may offer health programs
+- Black men's health initiatives in your area
+- Online communities for health accountability and support
+
+Would you like help finding healthcare providers, or guidance on specific physical health concerns?
+
+---
+*Physical health guidance informed by [MenRUs.co.uk](https://menrus.co.uk) and culturally competent health resources*`
+}
+
+function generateHealthcareNavigationAdvice(): string {
+  return `🏥 **NAVIGATING HEALTHCARE AS A BLACK QUEER MAN**
+
+**Finding Affirming Healthcare:**
+
+**🔍 Research Providers:**
+- Ask: "Do you have experience with LGBTQ+ patients?"
+- Check if practice has non-discrimination policies
+- Look for rainbow flags, inclusive forms, gender-neutral restrooms
+
+**📝 Preparing for Appointments:**
+- Write down questions beforehand
+- Be specific about your identity and health needs
+- Bring a trusted friend for support if comfortable
+
+**🗣️ Effective Communication:**
+- Be direct about your sexual orientation and gender identity
+- Explain any discrimination you've experienced in healthcare
+- Advocate for yourself - you deserve respectful care
+
+**🚩 Red Flags to Watch For:**
+- Provider seems uncomfortable with LGBTQ+ identity
+- Dismissive of concerns or symptoms
+- Assumptions about your relationships or lifestyle
+- Unwillingness to learn or adapt care
+
+**🔄 When to Find New Care:**
+- You don't feel heard or respected
+- Provider lacks cultural competence
+- Your health concerns aren't being addressed adequately
+
+**📞 Resources for Finding Providers:**
+- **Pink Therapy**: LGBTQ+ affirming therapists
+- **LGBT Foundation**: Healthcare guidance
+- Local LGBTQ+ community centers for provider recommendations
+
+**💰 NHS vs Private Care:**
+- NHS provides free healthcare but may have waiting times
+- Private options available but consider costs
+- Some charities offer sliding scale fees
+
+**🛡️ Know Your Rights:**
+- Right to confidential care
+- Right to bring support person to appointments
+- Right to request different provider if needed
+
+**Emergency Situations:**
+- Focus on immediate medical needs
+- You can address LGBTQ+ competence issues later
+- Bring trusted contact for advocacy if possible
+
+Need help finding specific providers in your area, or have questions about advocating for yourself in medical settings?
+
+---
+*Healthcare navigation guidance sourced from [MenRUs.co.uk](https://menrus.co.uk) and LGBTQ+ health advocacy resources*`
+}
+
+function generateSubstanceHealthAdvice(): string {
+  return `🍃 **SUBSTANCE USE & HARM REDUCTION**
+
+**Understanding Substance Use in Our Community:**
+
+**📊 Community Context:**
+- LGBTQ+ individuals have higher rates of substance use
+- Often related to minority stress, discrimination, and coping
+- Social aspects of community spaces may involve substance use
+
+**🛡️ Harm Reduction Principles:**
+- Reducing harm is more important than total abstinence
+- Small changes can make big differences in safety
+- No judgment - focus on your wellbeing and safety
+
+**🔬 Chemsex Awareness:**
+If engaging in chemsex (using drugs during sex):
+- Know your substances and their interactions
+- Stay hydrated and take breaks
+- Have sober friends who know your whereabouts
+- Access to clean supplies and testing
+
+**⚠️ Warning Signs:**
+- Using alone frequently
+- Neglecting responsibilities or relationships
+- Physical or mental health declining
+- Unable to enjoy activities without substances
+
+**🆘 Getting Support:**
+- **Antidote** (London): 020 7833 7606 - Chemsex support
+- **Turning Point**: Drug and alcohol services
+- **LGBT Foundation**: Community-specific support
+- Local drug and alcohol services through your GP
+
+**🏥 Healthcare Integration:**
+- Be honest with healthcare providers about substance use
+- They can provide medical support and monitoring
+- Confidentiality protects you in most situations
+
+**🤝 Building Support:**
+- Connect with others in recovery within LGBTQ+ community
+- Consider support groups (online or in-person)
+- Develop activities and relationships not centered on substance use
+
+**💪 Self-Care During Recovery:**
+- Mental health support is crucial during recovery process
+- Physical health may need attention and monitoring
+- Rebuilding identity and relationships takes time
+
+**🌟 Remember:**
+- Recovery looks different for everyone
+- Community support accelerates healing
+- You deserve health, happiness, and authentic relationships
+
+Need help finding specific substance use services, or support navigating recovery in an LGBTQ+ affirming environment?
+
+---
+*Harm reduction information informed by [MenRUs.co.uk](https://menrus.co.uk) and specialist LGBTQ+ substance use resources*`
+}
+
+function generateJoyAndWellnessAdvice(): string {
+  return `🎭 **DAILY JOY & WELLNESS BOOSTS**
+
+**LAUGHTER IS MEDICINE - ESPECIALLY FOR US! 😂**
+
+**🎉 DAILY JOY PRACTICES:**
+• **Meme Therapy**: Follow Black queer content creators who make you laugh
+• **Dance Breaks**: Put on your favorite song and move your body (even for 30 seconds!)
+• **Affirmation Comedy**: "I'm not just surviving, I'm THRIVING and looking fabulous doing it!"
+• **Group Chat Chaos**: Share funny moments with your chosen family
+
+**😂 HUMOR FOR MENTAL HEALTH:**
+Research shows laughter:
+• Reduces cortisol (stress hormone) levels
+• Releases endorphins (natural mood boosters)
+• Strengthens immune system
+• Builds community connections
+
+**🎬 ENTERTAINMENT RECOMMENDATIONS:**
+• **Podcasts**: "Food 4 Thot", "The Read", "2 Dope Queens" (archives)
+• **Comedy Specials**: Wanda Sykes, Lil Rel Howery, Robin Thede
+• **TV Shows**: "Insecure", "Atlanta", "RuPaul's Drag Race UK"
+• **TikTok/Instagram**: @joelhoneyb, @theshaderoom (for the chaos)
+
+**🌈 COMMUNITY FUN:**
+• **Drag Bingo**: Most cities have queer-friendly venues
+• **Comedy Nights**: Look for QTIPOC-centered events
+• **Game Nights**: Host virtual or in-person game sessions
+• **Karaoke**: Because singing badly with friends is therapeutic
+
+**😎 SELF-CARE THROUGH PLAY:**
+• **Adult Coloring Books**: Surprisingly relaxing
+• **Video Games**: Escapism can be healthy in moderation
+• **Creative Writing**: Write fanfiction, poetry, or random thoughts
+• **Photography**: Document beautiful moments in your daily life
+
+**💪 WHEN JOY FEELS HARD:**
+Sometimes depression makes joy feel impossible. That's okay!
+• Start micro-small: One funny video, one song you like
+• Ask friends to send you memes (they love having a mission!)
+• Remember: Forcing joy doesn't work, but creating space for it does
+• Professional support is available when joy feels consistently distant
+
+**🌟 BLKOUT COMMUNITY JOY:**
+Check out [BLKOUT Events](https://blkout.uk/events) for:
+• Community celebrations and parties
+• Cultural events and performances
+• Social gatherings and networking
+• Creative workshops and collaborative projects
+
+**🥰 DAILY REMINDER:**
+"Your joy is an act of resistance. Your laughter is revolutionary. Your happiness matters - not because you earn it, but because you ARE it."
+
+Need suggestions for specific types of entertainment, or want help incorporating more joy into your daily routine?
+
+---
+*Joy and wellness practices informed by positive psychology research and community wisdom*`
+}
+
 function handleCommunityResources(message: string, session: UserSession): string {
   return generateCommunityResourceResponse('general')
 }
@@ -1131,16 +2015,22 @@ I can connect you with culturally competent mental health support:
   }
   
   if (resourceType === 'general') {
-    return `**Community Resources Available**
+    return `**COMMUNITY RESOURCES AVAILABLE**
 
-I can provide immediate resources for:
-🧠 **Mental Health** - Culturally competent therapy and crisis support
-🏠 **Housing** - LGBTQ+ friendly accommodation and emergency help
-⚖️ **Legal Support** - Discrimination guidance and civil rights advocacy
-🌈 **Community** - Local QTIPOC events and support groups
-🚨 **Crisis Support** - 24/7 helplines and emergency services
+**🌟 CONNECT WITH THE BLKOUT COMMUNITY:**
+• **[BLKOUT EVENTS](https://blkout.uk/events)** - Community gatherings, workshops, and liberation activities
+• **[BLKOUT NEWSROOM](https://blkout.uk/newsroom)** - Latest community updates and advocacy news
+• **[BLKOUTHUB](https://blkouthub.com)** - Community platform and resources
+• **[BLKOUT NEWSLETTER](https://blkout.uk/newsletter)** - Weekly community updates and opportunities
 
-**Plus comprehensive coaching programs:**
+**🛡️ IMMEDIATE SUPPORT RESOURCES:**
+🧠 **MENTAL HEALTH** - Culturally competent therapy and crisis support
+🏠 **HOUSING** - LGBTQ+ friendly accommodation and emergency help
+⚖️ **LEGAL SUPPORT** - Discrimination guidance and civil rights advocacy
+🌈 **COMMUNITY** - Local QTIPOC events and support groups
+🚨 **CRISIS SUPPORT** - 24/7 helplines and emergency services
+
+**💎 COMPREHENSIVE COACHING PROGRAMS:**
 🌱 Wellness & Habit Development | 🧩 Problem-Solving | 💕 Relationships | 🚀 Career
 
 Just tell me what you need - whether it's immediate resources or structured coaching support!`
@@ -1194,19 +2084,595 @@ app.get('/api/conversations', async (req, res) => {
   }
 })
 
+// Admin Weekly Report - Usage analytics and service gaps
+app.get('/api/admin/weekly-report', async (req, res) => {
+  try {
+    const { week, year } = req.query
+    const targetWeek = week ? parseInt(week as string) : new Date().getWeek()
+    const targetYear = year ? parseInt(year as string) : new Date().getFullYear()
+    
+    // Generate comprehensive weekly report
+    const report = generateWeeklyAdminReport(targetWeek, targetYear)
+    
+    logger.info('Generated weekly admin report', {
+      week: targetWeek,
+      year: targetYear,
+      totalConversations: report.metrics.totalConversations
+    })
+    
+    res.json({
+      report,
+      generated: new Date().toISOString(),
+      week: targetWeek,
+      year: targetYear
+    })
+  } catch (error) {
+    logger.error('Error generating weekly report', { error })
+    res.status(500).json({ error: 'Failed to generate weekly report' })
+  }
+})
+
+// User Monthly Transparency Report - Community usage insights
+app.get('/api/transparency/monthly-report', async (req, res) => {
+  try {
+    const { month, year } = req.query
+    const targetMonth = month ? parseInt(month as string) : new Date().getMonth() + 1
+    const targetYear = year ? parseInt(year as string) : new Date().getFullYear()
+    
+    // Generate privacy-preserving transparency report
+    const report = generateMonthlyTransparencyReport(targetMonth, targetYear)
+    
+    logger.info('Generated monthly transparency report', {
+      month: targetMonth,
+      year: targetYear
+    })
+    
+    res.json({
+      report,
+      generated: new Date().toISOString(),
+      month: targetMonth,
+      year: targetYear,
+      transparency_note: "This report aggregates anonymous usage data to show how I.V.O.R. serves the BLKOUT community while protecting individual privacy."
+    })
+  } catch (error) {
+    logger.error('Error generating transparency report', { error })
+    res.status(500).json({ error: 'Failed to generate transparency report' })
+  }
+})
+
+// Admin Analytics Dashboard - Real-time patterns
+app.get('/api/admin/analytics', async (req, res) => {
+  try {
+    const analytics = {
+      realTimePatterns: Array.from(learningPatterns.values())
+        .filter(p => p.confidence > 0.5)
+        .sort((a, b) => b.frequency - a.frequency)
+        .slice(0, 20),
+      serviceGaps: Array.from(serviceGaps.values())
+        .sort((a, b) => {
+          const urgencyWeight = { critical: 4, high: 3, medium: 2, low: 1 }
+          return urgencyWeight[b.urgency] - urgencyWeight[a.urgency]
+        })
+        .slice(0, 10),
+      systemHealth: {
+        totalConversations: Array.from(conversationMetrics.values())
+          .reduce((sum, metrics) => sum + metrics.length, 0),
+        averageResponseTime: calculateAverageResponseTime(),
+        activePatterns: learningPatterns.size,
+        identifiedGaps: serviceGaps.size
+      }
+    }
+    
+    res.json(analytics)
+  } catch (error) {
+    logger.error('Error fetching analytics', { error })
+    res.status(500).json({ error: 'Failed to fetch analytics' })
+  }
+})
+
+// Helper functions for report generation
+function generateWeeklyAdminReport(week: number, year: number) {
+  const weeklyMetrics = Array.from(conversationMetrics.values())
+    .flat()
+    .filter(m => m.weekOfYear === week && m.timestamp.getFullYear() === year)
+  
+  const serviceUsage = weeklyMetrics
+    .filter(m => m.serviceUsed)
+    .reduce((acc, m) => {
+      acc[m.serviceUsed!] = (acc[m.serviceUsed!] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+  
+  const topicTrends = weeklyMetrics
+    .filter(m => m.topicCategory)
+    .reduce((acc, m) => {
+      acc[m.topicCategory!] = (acc[m.topicCategory!] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+  
+  const performanceMetrics = {
+    averageResponseTime: weeklyMetrics
+      .filter(m => m.responseTime > 0)
+      .reduce((sum, m, _, arr) => sum + m.responseTime / arr.length, 0),
+    slowResponses: weeklyMetrics.filter(m => m.responseTime > 3000).length,
+    deviceBreakdown: weeklyMetrics
+      .reduce((acc, m) => {
+        if (m.deviceType) acc[m.deviceType] = (acc[m.deviceType] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+  }
+  
+  return {
+    period: `Week ${week}, ${year}`,
+    metrics: {
+      totalConversations: Math.floor(weeklyMetrics.length / 2), // Divide by 2 (user + assistant messages)
+      uniqueUsers: new Set(weeklyMetrics.map(m => m.conversationId)).size,
+      serviceUsage,
+      topicTrends,
+      performanceMetrics
+    },
+    insights: {
+      mostUsedService: Object.entries(serviceUsage).sort(([,a], [,b]) => b - a)[0]?.[0] || 'None',
+      emergingTopics: Object.entries(topicTrends).sort(([,a], [,b]) => b - a).slice(0, 3),
+      performanceStatus: performanceMetrics.averageResponseTime < 2000 ? 'Good' : 'Needs Attention'
+    },
+    serviceGaps: Array.from(serviceGaps.values())
+      .filter(gap => gap.discovered.getWeek() === week)
+      .sort((a, b) => {
+        const urgencyWeight = { critical: 4, high: 3, medium: 2, low: 1 }
+        return urgencyWeight[b.urgency] - urgencyWeight[a.urgency]
+      }),
+    learningPatterns: Array.from(learningPatterns.values())
+      .filter(p => p.confidence > 0.3)
+      .sort((a, b) => b.frequency - a.frequency)
+      .slice(0, 10),
+    recommendations: generateAdminRecommendations(weeklyMetrics, serviceUsage)
+  }
+}
+
+function generateMonthlyTransparencyReport(month: number, year: number) {
+  const monthlyMetrics = Array.from(conversationMetrics.values())
+    .flat()
+    .filter(m => m.monthOfYear === month && m.timestamp.getFullYear() === year)
+  
+  const totalConversations = Math.floor(monthlyMetrics.length / 2)
+  const uniqueUsers = new Set(monthlyMetrics.map(m => m.conversationId)).size
+  
+  const serviceImpact = monthlyMetrics
+    .filter(m => m.serviceUsed)
+    .reduce((acc, m) => {
+      acc[m.serviceUsed!] = (acc[m.serviceUsed!] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+  
+  const communityNeeds = monthlyMetrics
+    .filter(m => m.topicCategory)
+    .reduce((acc, m) => {
+      acc[m.topicCategory!] = (acc[m.topicCategory!] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+  
+  return {
+    period: `${getMonthName(month)} ${year}`,
+    community_impact: {
+      total_conversations: totalConversations,
+      unique_community_members: uniqueUsers,
+      services_provided: Object.keys(serviceImpact).length,
+      most_needed_support: Object.entries(communityNeeds)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5)
+        .map(([category, count]) => ({
+          category: formatCategoryName(category),
+          usage_percentage: Math.round((count / monthlyMetrics.length) * 100)
+        }))
+    },
+    service_utilization: Object.entries(serviceImpact)
+      .sort(([,a], [,b]) => b - a)
+      .map(([service, count]) => ({
+        service: formatServiceName(service),
+        conversations: count,
+        percentage: Math.round((count / totalConversations) * 100)
+      })),
+    community_growth: {
+      new_conversations_trend: 'Growing', // Simplified for demo
+      repeat_usage: Math.round((uniqueUsers / totalConversations) * 100) + '%',
+      service_expansion: Array.from(serviceGaps.values())
+        .filter(gap => gap.discovered.getMonth() + 1 === month)
+        .map(gap => gap.description)
+    },
+    transparency_values: {
+      data_sovereignty: "All conversation data is processed transparently with community ownership principles",
+      privacy_protection: "Individual conversations remain private while aggregate insights support community needs",
+      democratic_governance: "Service improvements are guided by community usage patterns and feedback",
+      liberation_focus: "All services are designed specifically for Black queer liberation and empowerment"
+    }
+  }
+}
+
+function calculateAverageResponseTime(): number {
+  const allMetrics = Array.from(conversationMetrics.values()).flat()
+  const responseMetrics = allMetrics.filter(m => m.responseTime > 0)
+  
+  if (responseMetrics.length === 0) return 0
+  
+  return responseMetrics.reduce((sum, m) => sum + m.responseTime, 0) / responseMetrics.length
+}
+
+function generateAdminRecommendations(metrics: ConversationMetrics[], serviceUsage: Record<string, number>) {
+  const recommendations = []
+  
+  // Performance recommendations
+  const avgResponseTime = metrics
+    .filter(m => m.responseTime > 0)
+    .reduce((sum, m, _, arr) => sum + m.responseTime / arr.length, 0)
+  
+  if (avgResponseTime > 2500) {
+    recommendations.push({
+      type: 'performance',
+      priority: 'high',
+      issue: 'Response times above optimal threshold',
+      action: 'Consider optimizing response generation or scaling infrastructure'
+    })
+  }
+  
+  // Service utilization recommendations
+  const totalUsage = Object.values(serviceUsage).reduce((sum, count) => sum + count, 0)
+  const underutilizedServices = Object.entries(serviceUsage)
+    .filter(([, count]) => count < totalUsage * 0.1)
+    .map(([service]) => service)
+  
+  if (underutilizedServices.length > 0) {
+    recommendations.push({
+      type: 'service_promotion',
+      priority: 'medium',
+      issue: `Low usage for: ${underutilizedServices.join(', ')}`,
+      action: 'Consider improving service discovery or user education'
+    })
+  }
+  
+  return recommendations
+}
+
+function formatCategoryName(category: string): string {
+  return category.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ')
+}
+
+function formatServiceName(service: string): string {
+  return service.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ')
+}
+
+function getMonthName(month: number): string {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+  return months[month - 1] || 'Unknown'
+}
+
+// Email Service Functions
+async function sendWeeklyReportEmail() {
+  try {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      logger.warn('Email not configured - skipping weekly report email')
+      return
+    }
+
+    const currentDate = new Date()
+    const week = currentDate.getWeek()
+    const year = currentDate.getFullYear()
+    
+    // Generate the weekly report
+    const report = generateWeeklyAdminReport(week, year)
+    
+    // Create HTML email template
+    const htmlContent = generateWeeklyReportEmailHTML(report, week, year)
+    
+    const mailOptions = {
+      from: `"I.V.O.R. Analytics" <${process.env.SMTP_USER}>`,
+      to: 'rob@blkoutuk.com',
+      subject: `I.V.O.R. Weekly Report - Week ${week}, ${year}`,
+      html: htmlContent,
+      attachments: [{
+        filename: `ivor-weekly-report-w${week}-${year}.json`,
+        content: JSON.stringify(report, null, 2),
+        contentType: 'application/json'
+      }]
+    }
+
+    const result = await transporter.sendMail(mailOptions)
+    
+    logger.info('Weekly report email sent successfully', {
+      messageId: result.messageId,
+      week,
+      year,
+      recipient: 'rob@blkoutuk.com'
+    })
+    
+    return { success: true, messageId: result.messageId }
+  } catch (error) {
+    logger.error('Failed to send weekly report email:', error)
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+function generateWeeklyReportEmailHTML(report: any, week: number, year: number): string {
+  const { metrics, insights, serviceGaps, recommendations } = report
+  
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; text-align: center; margin-bottom: 30px; }
+    .logo { font-size: 2.5em; margin-bottom: 10px; }
+    .section { background: #f8f9fa; padding: 25px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #667eea; }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+    .metric-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .metric-number { font-size: 2em; font-weight: bold; color: #667eea; }
+    .metric-label { color: #666; font-size: 0.9em; }
+    .service-list { list-style: none; padding: 0; }
+    .service-item { background: white; margin: 10px 0; padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+    .gap-item { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .rec-item { background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .footer { text-align: center; margin-top: 40px; padding: 20px; color: #666; border-top: 1px solid #ddd; }
+    .blkout-brand { color: #e83e8c; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🤖 I.V.O.R.</div>
+    <h1>Weekly Analytics Report</h1>
+    <p>Week ${week}, ${year} • Generated ${new Date().toLocaleDateString()}</p>
+  </div>
+
+  <div class="section">
+    <h2>📊 Key Metrics</h2>
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-number">${metrics.totalConversations}</div>
+        <div class="metric-label">Total Conversations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number">${metrics.uniqueUsers}</div>
+        <div class="metric-label">Unique Users</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number">${Math.round(metrics.performanceMetrics.averageResponseTime)}ms</div>
+        <div class="metric-label">Avg Response Time</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-number">${Object.keys(metrics.serviceUsage).length}</div>
+        <div class="metric-label">Services Used</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🌟 Service Usage</h2>
+    <ul class="service-list">
+      ${Object.entries(metrics.serviceUsage).map(([service, count]) => `
+        <li class="service-item">
+          <span><strong>${formatServiceName(service)}</strong></span>
+          <span><strong>${count}</strong> conversations</span>
+        </li>
+      `).join('')}
+    </ul>
+    ${Object.keys(metrics.serviceUsage).length === 0 ? '<p><em>No service usage recorded this week.</em></p>' : ''}
+  </div>
+
+  <div class="section">
+    <h2>📈 Trending Topics</h2>
+    <ul class="service-list">
+      ${Object.entries(metrics.topicTrends).map(([topic, count]) => `
+        <li class="service-item">
+          <span><strong>${formatCategoryName(topic)}</strong></span>
+          <span><strong>${count}</strong> mentions</span>
+        </li>
+      `).join('')}
+    </ul>
+    ${Object.keys(metrics.topicTrends).length === 0 ? '<p><em>No topic trends identified this week.</em></p>' : ''}
+  </div>
+
+  <div class="section">
+    <h2>💡 Key Insights</h2>
+    <p><strong>Most Used Service:</strong> ${insights.mostUsedService}</p>
+    <p><strong>Performance Status:</strong> ${insights.performanceStatus}</p>
+    <p><strong>Device Breakdown:</strong></p>
+    <ul>
+      ${Object.entries(metrics.performanceMetrics.deviceBreakdown).map(([device, count]) => `
+        <li><strong>${device}:</strong> ${count} sessions</li>
+      `).join('')}
+    </ul>
+  </div>
+
+  ${serviceGaps.length > 0 ? `
+  <div class="section">
+    <h2>⚠️ Service Gaps Identified</h2>
+    ${serviceGaps.map((gap: any) => `
+      <div class="gap-item">
+        <h4>${gap.description}</h4>
+        <p><strong>Urgency:</strong> ${gap.urgency.toUpperCase()}</p>
+        <p><strong>Suggested Action:</strong> ${gap.suggestedAction}</p>
+        <p><strong>Community Impact:</strong> ${gap.communityImpact}</p>
+      </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  ${recommendations.length > 0 ? `
+  <div class="section">
+    <h2>🚀 Recommendations</h2>
+    ${recommendations.map((rec: any) => `
+      <div class="rec-item">
+        <h4>${rec.type.replace('_', ' ').toUpperCase()}</h4>
+        <p><strong>Issue:</strong> ${rec.issue}</p>
+        <p><strong>Recommended Action:</strong> ${rec.action}</p>
+        <p><strong>Priority:</strong> ${rec.priority.toUpperCase()}</p>
+      </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  <div class="footer">
+    <p>This report is generated automatically by I.V.O.R.'s analytics system</p>
+    <p>Part of the <span class="blkout-brand">BLKOUT</span> community platform for Black queer liberation</p>
+    <p><em>View detailed analytics at: <a href="https://backend-k88mhf7ea-robs-projects-54d653d3.vercel.app/api/admin/analytics">Admin Dashboard</a></em></p>
+  </div>
+</body>
+</html>
+  `
+}
+
+// Manual email endpoint for testing
+app.post('/api/admin/send-weekly-report', async (req, res) => {
+  try {
+    const result = await sendWeeklyReportEmail()
+    
+    if (result && result.success) {
+      res.json({
+        success: true,
+        message: 'Weekly report email sent successfully',
+        messageId: result.messageId
+      })
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send email',
+        error: result ? result.error : 'Unknown error'
+      })
+    }
+  } catch (error) {
+    logger.error('Error in manual email send:', error)
+    res.status(500).json({ error: 'Failed to send weekly report email' })
+  }
+})
+
+// Schedule weekly email reports
+// Runs every Monday at 9:00 AM UTC
+cron.schedule('0 9 * * 1', async () => {
+  logger.info('Starting scheduled weekly report email...')
+  await sendWeeklyReportEmail()
+}, {
+  timezone: "UTC"
+})
+
+logger.info('Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC')
+
 // Error handling middleware
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error('Unhandled error', { error: error.stack })
   res.status(500).json({ error: 'Internal server error' })
 })
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Not found' })
+// Catch-all handler: send back React's index.html file for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'))
+})
+
+// Tell I.V.O.R. resource submission endpoint
+app.post('/api/tell-ivor', async (req, res) => {
+  try {
+    const { resourceUrl, resourceTitle, category, description, submitterName, submitterEmail } = req.body
+    
+    // Validate required fields
+    if (!resourceUrl || !resourceTitle || !category || !description) {
+      return res.status(400).json({ error: 'Missing required fields' })
+    }
+
+    // Validate URL format
+    try {
+      new URL(resourceUrl)
+    } catch {
+      return res.status(400).json({ error: 'Invalid URL format' })
+    }
+
+    // Create email content
+    const emailSubject = `New Resource Submission: ${resourceTitle}`
+    const emailBody = `
+New resource submitted to I.V.O.R.:
+
+📍 Resource Details:
+• Title: ${resourceTitle}
+• URL: ${resourceUrl}
+• Category: ${category}
+• Description: ${description}
+
+👤 Submitted By:
+• Name: ${submitterName || 'Anonymous'}
+• Email: ${submitterEmail || 'Not provided'}
+
+🕒 Submitted: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}
+
+---
+Review this resource for potential inclusion in I.V.O.R.'s knowledge base.
+
+From: I.V.O.R. Tell I.V.O.R. System
+`
+
+    // Log the submission
+    logger.info('Resource submission received', {
+      resourceUrl,
+      resourceTitle,
+      category,
+      submitterName: submitterName || 'Anonymous',
+      timestamp: new Date().toISOString()
+    })
+
+    // Send email notification (will work when SMTP is configured)
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      })
+
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: 'rob@blkoutuk.com',
+          subject: emailSubject,
+          text: emailBody
+        })
+
+        logger.info('Resource submission email sent successfully', {
+          resourceTitle,
+          timestamp: new Date().toISOString()
+        })
+      } else {
+        logger.warn('SMTP not configured - resource submission logged but not emailed', {
+          resourceTitle
+        })
+      }
+    } catch (emailError) {
+      logger.error('Failed to send resource submission email', {
+        error: emailError,
+        resourceTitle
+      })
+      // Continue without failing the request - log for later follow-up
+    }
+
+    res.json({ 
+      message: 'Resource submission received successfully',
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    logger.error('Error processing resource submission', { error })
+    res.status(500).json({ error: 'Failed to process resource submission' })
+  }
 })
 
 // Start server
 app.listen(PORT, () => {
-  logger.info(`IVOR Backend running on port ${PORT}`)
   console.log(`🤖 IVOR Backend running on port ${PORT}`)
+  logger.info(`IVOR Backend running on port ${PORT}`)
 })

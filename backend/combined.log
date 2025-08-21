@@ -63,3 +63,40 @@
 {"conversationId":"test-journal-3","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":7,"timestamp":"2025-08-21T00:07:22.333Z"}
 {"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:15:14.463Z"}
 {"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:15:29.869Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T09:58:55.850Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T09:59:10.444Z","userAgent":"curl/8.5.0"}
+{"hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":20,"timestamp":"2025-08-21T09:59:10.446Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T09:59:26.408Z","userAgent":"curl/8.5.0"}
+{"hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":13,"timestamp":"2025-08-21T09:59:26.408Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T09:59:36.787Z","userAgent":"curl/8.5.0"}
+{"hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":13,"timestamp":"2025-08-21T09:59:36.787Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T10:49:53.366Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/weekly-report","timestamp":"2025-08-21T10:50:01.571Z","userAgent":"curl/8.5.0"}
+{"level":"info","message":"Generated weekly admin report","timestamp":"2025-08-21T10:50:01.572Z","totalConversations":0,"week":34,"year":2025}
+{"ip":"::1","level":"info","message":"GET /api/transparency/monthly-report","timestamp":"2025-08-21T10:50:01.911Z","userAgent":"curl/8.5.0"}
+{"level":"info","message":"Generated monthly transparency report","month":8,"timestamp":"2025-08-21T10:50:01.913Z","year":2025}
+{"ip":"::1","level":"info","message":"GET /api/admin/analytics","timestamp":"2025-08-21T10:50:02.232Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T10:50:52.091Z","userAgent":"Mozilla/5.0 (Mobile)"}
+{"conversationId":"test-analytics-001","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":45,"timestamp":"2025-08-21T10:50:52.092Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/analytics","timestamp":"2025-08-21T10:50:56.039Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/weekly-report","timestamp":"2025-08-21T10:51:00.499Z","userAgent":"curl/8.5.0"}
+{"level":"info","message":"Generated weekly admin report","timestamp":"2025-08-21T10:51:00.500Z","totalConversations":1,"week":34,"year":2025}
+{"ip":"::1","level":"info","message":"GET /api/admin/weekly-report","timestamp":"2025-08-21T10:51:03.922Z","userAgent":"curl/8.5.0"}
+{"level":"info","message":"Generated weekly admin report","timestamp":"2025-08-21T10:51:03.922Z","totalConversations":1,"week":34,"year":2025}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-21T11:47:06.272Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-21T11:47:06.302Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T11:47:06.304Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T11:47:27.711Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-distress-medium","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":36,"timestamp":"2025-08-21T11:47:27.712Z"}
+{"conversationId":"test-distress-medium","distressLevel":"high","indicators":["hopeless","sad"],"level":"warn","message":"Emergency distress detected","timestamp":"2025-08-21T11:47:27.712Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T11:47:33.803Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-distress-critical","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":43,"timestamp":"2025-08-21T11:47:33.803Z"}
+{"conversationId":"test-distress-critical","distressLevel":"critical","indicators":["hurt myself"],"level":"warn","message":"Emergency distress detected","timestamp":"2025-08-21T11:47:33.803Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T11:47:43.701Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-joy","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":36,"timestamp":"2025-08-21T11:47:43.701Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T11:47:53.632Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-joy-specific","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":22,"timestamp":"2025-08-21T11:47:53.633Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T11:48:05.593Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-health","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":20,"timestamp":"2025-08-21T11:48:05.593Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T11:48:14.766Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-health-new","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":29,"timestamp":"2025-08-21T11:48:14.767Z"}
