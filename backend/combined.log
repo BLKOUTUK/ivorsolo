@@ -1,0 +1,65 @@
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T19:06:36.598Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T19:26:24.288Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-123","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":40,"timestamp":"2025-08-20T19:26:24.290Z"}
+{"ip":"::1","level":"info","message":"GET /health","timestamp":"2025-08-20T19:26:24.775Z","userAgent":"curl/8.5.0"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T21:07:37.692Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T21:07:49.669Z","userAgent":"curl/8.5.0"}
+{"conversationId":"frontend-test","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":29,"timestamp":"2025-08-20T21:07:49.670Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T21:09:31.221Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:15:26.500Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:16:19.092Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:41:41.506Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:42:07.630Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-wellness-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":24,"timestamp":"2025-08-20T23:42:07.631Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:42:41.817Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-wellness-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":325,"timestamp":"2025-08-20T23:42:41.817Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:42:53.108Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-problem-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":29,"timestamp":"2025-08-20T23:42:53.111Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:43:12.885Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-problem-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":278,"timestamp":"2025-08-20T23:43:12.885Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:43:30.357Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-problem-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":17,"timestamp":"2025-08-20T23:43:30.358Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:43:42.959Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-problem-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":9,"timestamp":"2025-08-20T23:43:42.963Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:43:57.744Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:44:10.344Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:44:20.146Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:44:33.032Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-nav-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":9,"timestamp":"2025-08-20T23:44:33.033Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:44:44.724Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-nav-2","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":24,"timestamp":"2025-08-20T23:44:44.727Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:44:44.796Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-nav-2","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":9,"timestamp":"2025-08-20T23:44:44.796Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:51:24.278Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:51:41.712Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:55:02.905Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:55:15.379Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-dual-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":8,"timestamp":"2025-08-20T23:55:15.380Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:55:32.787Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-dual-2","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":24,"timestamp":"2025-08-20T23:55:32.788Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:55:32.855Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-dual-3","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":24,"timestamp":"2025-08-20T23:55:32.855Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-20T23:55:45.744Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-dual-2","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":33,"timestamp":"2025-08-20T23:55:45.744Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:57:56.532Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-20T23:59:55.023Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:00:43.510Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:01:09.590Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:06:00.197Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T00:06:10.912Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-journal-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":16,"timestamp":"2025-08-21T00:06:10.912Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T00:06:19.287Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-journal-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":7,"timestamp":"2025-08-21T00:06:19.288Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T00:06:29.471Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-journal-1","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":5,"timestamp":"2025-08-21T00:06:29.472Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:06:39.810Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T00:06:54.846Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-journal-2","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":7,"timestamp":"2025-08-21T00:06:54.851Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T00:06:54.995Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-journal-2","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":5,"timestamp":"2025-08-21T00:06:54.995Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T00:07:08.540Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-journal-3","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":17,"timestamp":"2025-08-21T00:07:08.540Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T00:07:22.333Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-journal-3","hasUserContext":true,"level":"info","message":"Processing chat message","messageLength":7,"timestamp":"2025-08-21T00:07:22.333Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:15:14.463Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-21T00:15:29.869Z"}
