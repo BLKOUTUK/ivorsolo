@@ -173,7 +173,9 @@ const AdminPanel: React.FC = () => {
       return
     }
 
-    if (!API_BASE) {
+    // In development, API_BASE is empty and we rely on Vite proxy
+    // Only show error if we're in production and API_BASE is not set
+    if (!API_BASE && import.meta.env.PROD) {
       alert('Backend API not configured. Scraping not available in production.')
       return
     }
