@@ -188,3 +188,28 @@
 {"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T14:43:52.858Z"}
 {"ip":"::1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T14:47:31.356Z","userAgent":"curl/8.5.0"}
 {"ip":"::1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T14:49:24.636Z","userAgent":"curl/8.5.0"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T16:18:18.159Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T16:18:18.175Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T16:18:18.178Z"}
+{"ip":"::1","level":"info","message":"POST /api/admin/test-search","timestamp":"2025-08-22T16:18:28.421Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/admin/test-search","timestamp":"2025-08-22T16:18:36.961Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T16:18:40.814Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T16:43:35.020Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"HEAD /health","timestamp":"2025-08-22T16:43:35.772Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T16:52:11.164Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T16:52:22.704Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/test-search","timestamp":"2025-08-22T17:00:22.124Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T17:00:33.084Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T17:00:38.350Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T17:04:51.524Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T17:04:51.973Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T17:05:42.533Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"HEAD /api/admin/scrape-website","timestamp":"2025-08-22T17:08:55.651Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"HEAD /api/admin/scrape-website","timestamp":"2025-08-22T17:08:56.144Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"GET /api/admin/scrape-website","timestamp":"2025-08-22T17:09:11.897Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T17:09:31.308Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T17:09:38.312Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T17:18:03.581Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T17:18:12.628Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T17:19:47.619Z","userAgent":"curl/8.5.0"}
+{"ip":"::ffff:127.0.0.1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T17:19:48.137Z","userAgent":"curl/8.5.0"}

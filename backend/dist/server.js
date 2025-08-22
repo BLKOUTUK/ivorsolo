@@ -28,7 +28,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 // Initialize Supabase (separate instance for IVOR)
 const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 // Initialize Knowledge Service
 const knowledgeService = new KnowledgeService(supabaseUrl, supabaseKey);
@@ -631,10 +631,10 @@ async function generateIVORResponse(message, userContext) {
     if (session.currentService) {
         return await handleServiceConversation(message, session);
     }
-    // Service selection logic
+    // Service selection logic (check for specific resource requests first)
     if (lowerMessage.includes('health advice') || lowerMessage.includes('health guidance') ||
-        lowerMessage.includes('sexual health') || lowerMessage.includes('mental health') ||
-        lowerMessage.includes('physical health') || lowerMessage.includes('healthcare')) {
+        lowerMessage.includes('sexual health') || lowerMessage.includes('physical health') ||
+        lowerMessage.includes('healthcare')) {
         session.currentService = 'health-advice';
         session.currentStep = 'introduction';
         return generateHealthTopicsMenu();
@@ -662,7 +662,8 @@ async function generateIVORResponse(message, userContext) {
     }
     // Legacy community resource responses (now part of service framework)
     if (lowerMessage.includes('mental health') || lowerMessage.includes('therapy') || lowerMessage.includes('counseling')) {
-        return generateCommunityResourceResponse('mental-health');
+        const resources = await knowledgeService.getResourcesByCategory('Mental Health');
+        return knowledgeService.formatResourcesForResponse(resources, 'Mental health support is crucial for our wellbeing. Here are specialized resources for LGBTQ+ community:');
     }
     if (lowerMessage.includes('housing') || lowerMessage.includes('accommodation') || lowerMessage.includes('homeless')) {
         const resources = await knowledgeService.getResourcesByCategory('Housing');
