@@ -192,7 +192,13 @@ const AdminPanel: React.FC = () => {
 
       const result = await response.json()
       
-      if (result.success) {
+      if (!response.ok || result.error) {
+        const errorMessage = result.details || result.error || 'Unknown error occurred'
+        alert('Failed to scrape website: ' + errorMessage)
+        return
+      }
+      
+      if (result.success && result.data) {
         // Auto-fill the form with scraped data
         setFormData({
           title: result.data.title || '',
@@ -211,11 +217,11 @@ const AdminPanel: React.FC = () => {
         })
         setShowAddForm(true)
       } else {
-        alert('Failed to scrape website: ' + result.error)
+        alert('Failed to scrape website: No data returned')
       }
     } catch (error) {
       console.error('Failed to scrape website:', error)
-      alert('Failed to scrape website')
+      alert('Failed to scrape website: ' + (error instanceof Error ? error.message : 'Network or connection error'))
     } finally {
       setIsScrapingLoading(false)
     }
