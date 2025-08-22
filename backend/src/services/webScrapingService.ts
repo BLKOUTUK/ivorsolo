@@ -59,7 +59,7 @@ class WebScrapingService {
     }
   }
 
-  private extractTitle($: cheerio.CheerioAPI): string {
+  private extractTitle($: any): string {
     // Try multiple selectors for title
     const titleSelectors = [
       'title',
@@ -84,7 +84,7 @@ class WebScrapingService {
     return ''
   }
 
-  private extractDescription($: cheerio.CheerioAPI): string {
+  private extractDescription($: any): string {
     // Try multiple selectors for description
     const descSelectors = [
       '[name="description"]',
@@ -115,7 +115,7 @@ class WebScrapingService {
     return ''
   }
 
-  private extractContent($: cheerio.CheerioAPI): string {
+  private extractContent($: any): string {
     // Look for main content areas
     const contentSelectors = [
       '.about',
@@ -138,7 +138,7 @@ class WebScrapingService {
     }
 
     // Fallback: combine all paragraphs
-    const allText = $('p').map((_, el) => $(el).text().trim()).get().join(' ')
+    const allText = $('p').map((_: any, el: any) => $(el).text().trim()).get().join(' ')
     if (allText.length > 50) {
       return allText.substring(0, 1000)
     }
@@ -146,7 +146,7 @@ class WebScrapingService {
     return ''
   }
 
-  private extractPhone($: cheerio.CheerioAPI, html: string): string {
+  private extractPhone($: any, html: string): string {
     // Look for phone numbers in various formats
     const phoneRegexes = [
       /(?:phone|tel|call)[:\s]*([+\d\s\-\(\)]{10,20})/gi,
@@ -181,7 +181,7 @@ class WebScrapingService {
     return ''
   }
 
-  private extractEmail($: cheerio.CheerioAPI, html: string): string {
+  private extractEmail($: any, html: string): string {
     // Look for email addresses
     const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g
 
@@ -207,7 +207,7 @@ class WebScrapingService {
     return ''
   }
 
-  private extractAddress($: cheerio.CheerioAPI, html: string): string {
+  private extractAddress($: any, html: string): string {
     // Look for addresses
     const addressSelectors = [
       '[itemprop="address"]',
@@ -246,13 +246,13 @@ class WebScrapingService {
     return ''
   }
 
-  private extractKeywords($: cheerio.CheerioAPI, html: string): string[] {
+  private extractKeywords($: any, html: string): string[] {
     const keywords: Set<string> = new Set()
 
     // Meta keywords
     const metaKeywords = $('[name="keywords"]').attr('content')
     if (metaKeywords) {
-      metaKeywords.split(',').forEach(kw => keywords.add(kw.trim().toLowerCase()))
+      metaKeywords.split(',').forEach((kw: string) => keywords.add(kw.trim().toLowerCase()))
     }
 
     // LGBTQ+ related terms
@@ -265,7 +265,7 @@ class WebScrapingService {
     ]
 
     const lowerHtml = html.toLowerCase()
-    const text = $.text().toLowerCase()
+    const text = $('body').text().toLowerCase()
 
     lgbtqTerms.forEach(term => {
       if (lowerHtml.includes(term) || text.includes(term)) {
