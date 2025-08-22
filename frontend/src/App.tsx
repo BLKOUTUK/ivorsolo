@@ -91,7 +91,7 @@ function App() {
               >
                 Start Chat
               </button>
-              {process.env.NODE_ENV === 'development' && (
+              {import.meta.env.DEV && (
                 <button
                   onClick={() => setCurrentView('admin')}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
