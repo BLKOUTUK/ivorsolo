@@ -3,8 +3,9 @@ import { ChatInterface } from './components/ChatInterface'
 import { UserGuide } from './components/UserGuide'
 import { IVORIntro } from './components/IVORIntro'
 import { TellIVOR } from './components/TellIVOR'
+import AdminPanel from './components/AdminPanel'
 
-type View = 'intro' | 'chat' | 'guide' | 'tell-ivor'
+type View = 'intro' | 'chat' | 'guide' | 'tell-ivor' | 'admin'
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('intro')
@@ -90,6 +91,19 @@ function App() {
               >
                 Start Chat
               </button>
+              {process.env.NODE_ENV === 'development' && (
+                <button
+                  onClick={() => setCurrentView('admin')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    currentView === 'admin'
+                      ? 'bg-red-600 text-white shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-red-600/20'
+                  }`}
+                  title="Admin Panel"
+                >
+                  ⚙️ Admin
+                </button>
+              )}
             </nav>
           </div>
         </div>
@@ -101,6 +115,22 @@ function App() {
         {currentView === 'guide' && <UserGuide onStartChat={() => setCurrentView('chat')} />}
         {currentView === 'tell-ivor' && <TellIVOR onClose={() => setCurrentView('intro')} />}
         {currentView === 'chat' && <ChatInterface className="h-full" />}
+        {currentView === 'admin' && (
+          <div className="min-h-full bg-gray-50 p-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-gray-900">IVOR Admin Panel</h1>
+                <button
+                  onClick={() => setCurrentView('intro')}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Back to IVOR
+                </button>
+              </div>
+              <AdminPanel />
+            </div>
+          </div>
+        )}
       </main>
 
       {/* BLKOUT Footer */}

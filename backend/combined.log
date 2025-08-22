@@ -100,3 +100,91 @@
 {"conversationId":"test-health","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":20,"timestamp":"2025-08-21T11:48:05.593Z"}
 {"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-21T11:48:14.766Z","userAgent":"curl/8.5.0"}
 {"conversationId":"test-health-new","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":29,"timestamp":"2025-08-21T11:48:14.767Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T12:39:35.741Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T12:39:35.772Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T12:39:35.777Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T12:39:55.817Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T12:39:55.846Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T12:39:55.849Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T12:41:49.096Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T12:41:49.120Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T12:41:49.123Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T12:42:21.779Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T12:42:21.811Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T12:42:21.814Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T12:42:49.405Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-housing-123","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":24,"timestamp":"2025-08-22T12:42:49.406Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T12:43:36.705Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-crisis-456","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":34,"timestamp":"2025-08-22T12:43:36.713Z"}
+{"conversationId":"test-crisis-456","distressLevel":"critical","indicators":["crisis"],"level":"warn","message":"Emergency distress detected","timestamp":"2025-08-22T12:43:36.713Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T12:43:46.623Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/admin/test-search","timestamp":"2025-08-22T12:44:47.815Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/resources","timestamp":"2025-08-22T12:44:52.285Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T12:46:32.527Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-wellness-789","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":24,"timestamp":"2025-08-22T12:46:32.528Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T13:43:32.498Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T13:43:32.514Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T13:43:32.515Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T13:43:45.325Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-123","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":24,"timestamp":"2025-08-22T13:43:45.326Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T13:43:55.928Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-456","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":28,"timestamp":"2025-08-22T13:43:55.928Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T13:43:56.289Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T13:48:02.410Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/resources","timestamp":"2025-08-22T13:48:02.721Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:00:14.179Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-housing","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":19,"timestamp":"2025-08-22T14:00:14.180Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:00:16.682Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-mental","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":28,"timestamp":"2025-08-22T14:00:16.682Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:00:19.427Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-crisis","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":14,"timestamp":"2025-08-22T14:00:19.427Z"}
+{"conversationId":"test-crisis","distressLevel":"critical","indicators":["crisis"],"level":"warn","message":"Emergency distress detected","timestamp":"2025-08-22T14:00:19.427Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T14:00:27.688Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/resources","timestamp":"2025-08-22T14:00:28.005Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:16:39.065Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-after-sql","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":19,"timestamp":"2025-08-22T14:16:39.067Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T14:16:39.498Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/resources","timestamp":"2025-08-22T14:16:39.840Z","userAgent":"curl/8.5.0"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T14:22:21.097Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T14:22:21.114Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T14:22:21.116Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:22:40.087Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-service-key","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":19,"timestamp":"2025-08-22T14:22:40.090Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T14:22:41.276Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T14:22:50.274Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:23:06.213Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-mental-2","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":28,"timestamp":"2025-08-22T14:23:06.214Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:23:24.709Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-mental-direct","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":13,"timestamp":"2025-08-22T14:23:24.709Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:23:56.529Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-mental-fixed","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":28,"timestamp":"2025-08-22T14:23:56.529Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T14:24:19.242Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T14:24:19.257Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T14:24:19.259Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:24:38.756Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-final-mental","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":28,"timestamp":"2025-08-22T14:24:38.756Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:25:05.747Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-final-legal","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":17,"timestamp":"2025-08-22T14:25:05.748Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T14:25:32.971Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T14:25:32.988Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T14:25:32.990Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:25:42.340Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-fixed-routing","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":28,"timestamp":"2025-08-22T14:25:42.341Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:25:58.323Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-legal-final","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":17,"timestamp":"2025-08-22T14:25:58.323Z"}
+{"ip":"::1","level":"info","message":"POST /api/chat","timestamp":"2025-08-22T14:26:09.116Z","userAgent":"curl/8.5.0"}
+{"conversationId":"test-crisis-db","hasUserContext":false,"level":"info","message":"Processing chat message","messageLength":11,"timestamp":"2025-08-22T14:26:09.116Z"}
+{"conversationId":"test-crisis-db","distressLevel":"critical","indicators":["crisis"],"level":"warn","message":"Emergency distress detected","timestamp":"2025-08-22T14:26:09.116Z"}
+{"ip":"::1","level":"info","message":"GET /api/admin/categories","timestamp":"2025-08-22T14:37:50.210Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"GET /api/admin/resources","timestamp":"2025-08-22T14:37:50.567Z","userAgent":"curl/8.5.0"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T14:42:37.006Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T14:42:37.021Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T14:42:37.023Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T14:43:14.373Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T14:43:14.388Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T14:43:14.389Z"}
+{"level":"warn","message":"Email not configured - weekly reports will not be sent automatically","timestamp":"2025-08-22T14:43:52.841Z"}
+{"level":"info","message":"Weekly report email scheduler initialized - emails will be sent every Monday at 9:00 AM UTC","timestamp":"2025-08-22T14:43:52.856Z"}
+{"level":"info","message":"IVOR Backend running on port 3001","timestamp":"2025-08-22T14:43:52.858Z"}
+{"ip":"::1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T14:47:31.356Z","userAgent":"curl/8.5.0"}
+{"ip":"::1","level":"info","message":"POST /api/admin/scrape-website","timestamp":"2025-08-22T14:49:24.636Z","userAgent":"curl/8.5.0"}

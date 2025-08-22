@@ -8,6 +8,7 @@ import winston from 'winston';
 import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
 import cron from 'node-cron';
+import KnowledgeService from './services/knowledgeService.js';
 // Load environment variables
 dotenv.config();
 // Logger setup
@@ -29,6 +30,10 @@ const PORT = process.env.PORT || 3001;
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Knowledge Service
+const knowledgeService = new KnowledgeService(supabaseUrl, supabaseKey);
+// Import admin routes
+import adminRoutes from './routes/admin.js';
 const emailConfig = {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -74,6 +79,8 @@ app.use((req, res, next) => {
     });
     next();
 });
+// Admin routes for knowledge base management
+app.use('/api/admin', adminRoutes);
 // In-memory stores for analytics (in production, use persistent database)
 const conversationMetrics = new Map();
 const learningPatterns = new Map();
@@ -658,35 +665,23 @@ async function generateIVORResponse(message, userContext) {
         return generateCommunityResourceResponse('mental-health');
     }
     if (lowerMessage.includes('housing') || lowerMessage.includes('accommodation') || lowerMessage.includes('homeless')) {
-        return `Housing security is fundamental to wellbeing. Here are LGBTQ+ friendly housing resources:
-
-• **Stonewall Housing** - Specialist LGBTQ+ housing support  
-• **Albert Kennedy Trust** - For LGBTQ+ youth (16-25)
-• **Shelter** - General housing advice with LGBTQ+ awareness
-• **Homeless Link** - Emergency accommodation finder
-• **Crisis** - Housing support and advocacy
-
-**Emergency numbers:**
-- Shelter helpline: 0808 800 4444
-- AKT crisis line: 0207 841 3354
-
-I can help you navigate applications, understand your rights, or find emergency accommodation. What's your current situation?`;
+        const resources = await knowledgeService.getResourcesByCategory('Housing');
+        return knowledgeService.formatResourcesForResponse(resources, 'Housing security is fundamental to wellbeing. Here are LGBTQ+ friendly housing resources:');
     }
     if (lowerMessage.includes('legal') || lowerMessage.includes('discrimination') || lowerMessage.includes('rights')) {
-        return `I can connect you with legal support that understands intersectional discrimination:
-
-• **Equality and Human Rights Commission** - Discrimination advice
-• **Liberty** - Civil rights legal support  
-• **ACAS** - Workplace discrimination: 0300 123 1100
-• **Galop** - LGBTQ+ hate crime support: 0207 704 2040
-• **Citizens Advice** - Free legal guidance
-
-**For immediate discrimination:**
-- Document everything (dates, witnesses, evidence)
-- Report to relevant authorities
-- Seek legal advice within time limits
-
-What type of legal support do you need? Workplace, housing, hate crime, or something else?`;
+        const resources = await knowledgeService.getResourcesByCategory('Legal Aid');
+        return knowledgeService.formatResourcesForResponse(resources, 'I can connect you with legal support that understands intersectional discrimination:');
+    }
+    if (lowerMessage.includes('crisis') || lowerMessage.includes('emergency') || lowerMessage.includes('urgent')) {
+        const resources = await knowledgeService.getCrisisResources();
+        return knowledgeService.formatResourcesForResponse(resources, '🚨 **IMMEDIATE SUPPORT AVAILABLE** - You are not alone and help is available right now:');
+    }
+    // General resource search
+    if (lowerMessage.includes('help') || lowerMessage.includes('support') || lowerMessage.includes('resource')) {
+        const resources = await knowledgeService.searchResources(message, 3);
+        if (resources.length > 0) {
+            return knowledgeService.formatResourcesForResponse(resources, 'I found some resources that might help:');
+        }
     }
     if (lowerMessage.includes('community') || lowerMessage.includes('events') || lowerMessage.includes('meetup')) {
         return `Connecting with community is powerful! Here are spaces for Black queer men:
