@@ -91,7 +91,7 @@ function App() {
               >
                 Start Chat
               </button>
-              {import.meta.env.DEV && (
+              {(import.meta.env.DEV || import.meta.env.VITE_SHOW_ADMIN === 'true') && (
                 <button
                   onClick={() => setCurrentView('admin')}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
