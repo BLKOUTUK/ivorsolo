@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const API_BASE = import.meta.env.VITE_API_BASE || ''
+
 interface Resource {
   id: string
   title: string
@@ -89,7 +91,7 @@ const AdminPanel: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/categories')
+      const response = await fetch(`${API_BASE}/api/admin/categories`)
       const data = await response.json()
       setCategories(data.categories || [])
     } catch (error) {
@@ -105,7 +107,7 @@ const AdminPanel: React.FC = () => {
       if (selectedCategory) params.append('category', selectedCategory)
       params.append('limit', '50')
 
-      const response = await fetch(`/api/admin/resources?${params}`)
+      const response = await fetch(`${API_BASE}/api/admin/resources?${params}`)
       const data = await response.json()
       setResources(data.resources || [])
     } catch (error) {
@@ -152,7 +154,7 @@ const AdminPanel: React.FC = () => {
     if (!confirm('Are you sure you want to delete this resource?')) return
 
     try {
-      const response = await fetch(`/api/admin/resources/${id}`, {
+      const response = await fetch(`${API_BASE}/api/admin/resources/${id}`, {
         method: 'DELETE'
       })
 
@@ -171,9 +173,14 @@ const AdminPanel: React.FC = () => {
       return
     }
 
+    if (!API_BASE) {
+      alert('Backend API not configured. Scraping not available in production.')
+      return
+    }
+
     setIsScrapingLoading(true)
     try {
-      const response = await fetch('/api/admin/scrape-website', {
+      const response = await fetch(`${API_BASE}/api/admin/scrape-website`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,7 +270,7 @@ const AdminPanel: React.FC = () => {
             is_active: true
           }
 
-          const response = await fetch('/api/admin/resources', {
+          const response = await fetch(`${API_BASE}/api/admin/resources`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(resourceData)
